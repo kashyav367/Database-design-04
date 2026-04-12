@@ -1,0 +1,98 @@
+vehicles[icon:car, color:blue]{
+  vehicle_id serial pk
+  vehicle_number varchar(20) unique
+  owner_name varchar(100)
+  color varchar(30)
+  vehicle_category_id int fk
+  created_at timestamp
+}
+
+vehicle_categories[icon:truck , color:blue]{
+  vehicle_category_id serial pk
+  category enum(bike,car,suv,cab,ev)
+  description text
+  created_at timestamp
+  updated_at timestamp
+}
+
+venues[icon:building, color:purple]{
+  venue_id serial pk
+  venue_name varchar(100)
+  location varchar(150)
+  capacity int
+  contact_email varchar(100)
+  contact_phone varchar(15)
+}
+
+  parking_zones[icon:map, color:green]{
+  zone_id serial pk
+  venue_id int fk
+  zone_name enum(A,B,C,D)
+  level_number int
+}
+
+spot_categories[icon:tag, color:orange]{
+  spot_category_id serial pk
+  name enum(bike,car,ev)
+}
+
+parking_spots[icon:grid, color:orange]{
+  spot_id serial pk
+  spot_category_id int fk
+  zone_id int fk
+  spot_number varchar(20) unique
+}
+
+access_categories[icon:user, color:purple]{
+  access_category_id serial pk
+  name  enum(VIP,staff,exhibitor,cosplayer)
+  created_at timestamp
+}
+
+parking_sessions[icon:clock, color:blue]{
+  session_id serial pk
+  vehicle_id int fk
+  spot_id int fk
+  access_category_id int fk
+  entry_time timestamp
+  exit_time timestamp
+}
+
+parking_tickets[icon:ticket, color:yellow]{
+  ticket_id serial pk
+  session_id int fk unique
+  ticket_number varchar(50) unique
+  issued_at timestamp
+}
+
+pricing_rules[icon:dollar-sign, color:green]{
+  pricing_id serial pk
+  vehicle_category_id int fk
+  spot_category_id int fk
+  rate_per_hour decimal(10,2)
+}
+
+payments[icon:credit-card, color:yellow]{
+  payment_id serial pk
+  session_id int fk unique
+  amount decimal(10,2)
+  payment_status enum(pending,failed,completed)
+  paid_at timestamp
+}
+
+vehicle_categories.vehicle_category_id < vehicles.vehicle_category_id
+
+venues.venue_id < parking_zones.venue_id
+parking_zones.zone_id < parking_spots.zone_id
+
+spot_categories.spot_category_id < parking_spots.spot_category_id
+
+vehicles.vehicle_id < parking_sessions.vehicle_id
+parking_spots.spot_id < parking_sessions.spot_id
+access_categories.access_category_id < parking_sessions.access_category_id
+
+parking_sessions.session_id - parking_tickets.session_id
+parking_sessions.session_id - payments.session_id
+
+vehicle_categories.vehicle_category_id < pricing_rules.vehicle_category_id
+spot_categories.spot_category_id < pricing_rules.spot_category_id
